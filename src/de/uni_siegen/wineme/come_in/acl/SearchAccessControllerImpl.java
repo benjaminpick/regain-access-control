@@ -42,7 +42,7 @@ public class SearchAccessControllerImpl implements SearchAccessController {
 	 *             If loading the config failed.
 	 */
 	@Override
-	public void init(Properties arg0) throws RegainException {
+	public void init(Properties config) throws RegainException {
 		// TODO Auto-generated method stub
 
 	}
@@ -61,9 +61,9 @@ public class SearchAccessControllerImpl implements SearchAccessController {
 	 *             If getting the groups failed.
 	 */
 	@Override
-	public String[] getUserGroups(PageRequest arg0) throws RegainException {
+	public String[] getUserGroups(PageRequest request) throws RegainException {
 		// TODO Auto-generated method stub
-		return null;
+		return new String[]{};
 	}
 
 }

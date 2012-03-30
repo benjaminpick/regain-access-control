@@ -42,7 +42,7 @@ public class CrawlerAccessControllerImpl implements CrawlerAccessController {
 	 *             If loading the config failed.
 	 */
 	@Override
-	public void init(Properties arg0) throws RegainException {
+	public void init(Properties config) throws RegainException {
 		// TODO Auto-generated method stub
 
 	}
@@ -61,9 +61,9 @@ public class CrawlerAccessControllerImpl implements CrawlerAccessController {
 	 *             If getting the groups failed.
 	 */
 	@Override
-	public String[] getDocumentGroups(RawDocument arg0) throws RegainException {
+	public String[] getDocumentGroups(RawDocument config) throws RegainException {
 		// TODO Auto-generated method stub
-		return null;
+		return new String[]{};
 	}
 
 }
