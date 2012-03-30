@@ -12,10 +12,10 @@ Install
 
 4. Modify SearchConfiguration.xml: Inside `<defaultSettings>`, add
 
->	<searchAccessController>
->		<class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.SearchAccessControllerImpl</class>
->    		<config>
->    			<param name="groupSeperator">,</param>
->			<param name="defaultGroups">public</param>
->		</config>
->	</searchAccessController>
+`	<searchAccessController>
+		<class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.SearchAccessControllerImpl</class>
+    		<config>
+    			<param name="groupSeperator">,</param>
+			<param name="defaultGroups">public</param>
+		</config>
+	</searchAccessController>`
