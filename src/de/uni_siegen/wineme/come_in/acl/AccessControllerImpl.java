@@ -30,7 +30,6 @@ public class AccessControllerImpl {
 	protected String groupSeperator = " ";
 
 	public void init(Properties config) throws RegainException {
-		System.out.println("init");
 		String groupSeperatorParam = config.getProperty("groupSeperator");
 		if (groupSeperatorParam != null && groupSeperatorParam.length() > 0)
 			groupSeperator = groupSeperatorParam; 
@@ -41,6 +40,17 @@ public class AccessControllerImpl {
 	}
 	
 	protected String[] groupSplit(String groups) {
+		if (groups == null || groups.length() == 0)
+			return new String[]{};
+
+		groups = groups.replaceAll(groupSeperator+"+", groupSeperator);
 		return groups.split(groupSeperator);
 	}
+	
+	/*
+System.out.print(arr.length + ": [");
+for (String r : arr)
+	System.out.print(r + ",");
+System.out.println("]");
+	 */
 }

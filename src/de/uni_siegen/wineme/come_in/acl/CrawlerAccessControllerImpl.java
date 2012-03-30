@@ -61,7 +61,7 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 	 */
 	@Override
 	public String[] getDocumentGroups(RawDocument config) throws RegainException {
-		String groups = defaultGroups; // TODO: Take Date from meta-file
+		String groups = defaultGroups; // TODO: Take Data from meta-file
 		return groupSplit(groups);
 	}
 

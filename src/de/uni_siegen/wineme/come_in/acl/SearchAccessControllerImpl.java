@@ -71,8 +71,6 @@ public class SearchAccessControllerImpl extends AccessControllerImpl implements 
 		if (groupsParam != null)
 			groups = groups + groupsParam;
 
-		System.out.println("Detected groups:" + groups);
-		String[] groupArr = groupSplit(groups);
-		return groupArr;
+		return groupSplit(groups);
 	}
 }
