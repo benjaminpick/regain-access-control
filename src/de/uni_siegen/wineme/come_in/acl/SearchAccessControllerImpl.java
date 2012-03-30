@@ -27,7 +27,12 @@ import net.sf.regain.RegainException;
 import net.sf.regain.search.access.SearchAccessController;
 import net.sf.regain.util.sharedtag.PageRequest;
 
-public class SearchAccessControllerImpl implements SearchAccessController {
+/**
+ * Get the groups the user can access.
+ *
+ * 
+ */
+public class SearchAccessControllerImpl extends AccessControllerImpl implements SearchAccessController {
 
 	/**
 	 * Initializes the SearchAccessController.
@@ -43,8 +48,7 @@ public class SearchAccessControllerImpl implements SearchAccessController {
 	 */
 	@Override
 	public void init(Properties config) throws RegainException {
-		// TODO Auto-generated method stub
-
+		super.init(config);
 	}
 
 	/**
@@ -62,8 +66,13 @@ public class SearchAccessControllerImpl implements SearchAccessController {
 	 */
 	@Override
 	public String[] getUserGroups(PageRequest request) throws RegainException {
-		// TODO Auto-generated method stub
-		return new String[]{};
-	}
+		String groups = defaultGroups;
+		String groupsParam = request.getParameter("groups");
+		if (groupsParam != null)
+			groups = groups + groupsParam;
 
+		System.out.println("Detected groups:" + groups);
+		String[] groupArr = groupSplit(groups);
+		return groupArr;
+	}
 }

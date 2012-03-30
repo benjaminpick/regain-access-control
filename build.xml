@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<project name="regain-access-control" default="targets" basedir=".">
+  <!--
+   | The properties and paths
+   +-->
+  <property file="build.properties"/>
+  <property environment="env"/>
+  <!-- set if java.dir not set in build.properties -->
+  <property name="java.dir" value="${env.JAVA_HOME}" />
+  <condition property="java_dir_empty">
+  	<or>
+  		<length string="${java.dir}" length="0" />
+  		<equals arg1="${java.dir}" arg2="$${env.JAVA_HOME}" />
+  		<not>
+  		  <isset property="java.dir" />
+  		</not>
+  	</or>
+  </condition>
+
+  <path id="sourcepath">
+    <pathelement location="src"/>
+  </path>
+  <path id="classpath" cache="true">
+    <pathelement location="build/classes"/>
+  	<pathelement location="${regain-location}/build/classes"/>
+  </path>
+
+  <target name="targets">
+	<echo message="ant target" />
+	<echo message="" />
+  	<echo message="available targets:"/>
+  	<echo message="  targets              Shows this list of targets."/>
+  	<echo message="  dump-info            Dumps some information (VM-Version...)."/>
+   	<echo message="  clean                Deletes the classes directory."/>
+   	<echo message="  make                 Compiles the source code."/>
+   	<echo message="  package              Packages the thumbnailer lib as standalone library." />
+    <echo message="  all                  Creates all."/>
+  </target>
+	
+  <!--
+   | Dump some information.
+   +-->
+  <target name="dump-info">
+    <echo message="java.dir=${java.dir}" />
+    <echo message="JAVA_HOME=${env.JAVA_HOME}" />
+    <echo message="java.vm.info=${java.vm.info}" />
+    <echo message="java.vm.name=${java.vm.name}" />
+    <echo message="java.vm.vendor=${java.vm.vendor}" />
+    <echo message="java.vm.version=${java.vm.version}" />
+    <echo message="os.arch=${os.arch}" />
+    <echo message="os.name=${os.name}" />
+    <echo message="os.version=${os.version}" />
+    <echo message="file.encoding=${file.encoding}" />
+    <echo message="user.language=${user.language}" />
+  </target>
+  
+  <!--
+   | Deletes the classes directory.
+   +-->
+  <target name="clean">
+    <delete dir="build/classes"/>
+  </target>
+  
+  <!--
+   | Compiles the source code.
+   +-->
+  <target name="make">
+    <echo message="Making sure everything is prepared at regain ..." />
+  	<ant dir="${regain-location}" useNativeBasedir="true" inheritAll="false">
+  		<target name="prepare-once"/>
+  		<target name="make"/>
+  	</ant>
+  	<echo message="Compiling regain plugin ... (Regain is in ${regain-location})" />
+    <fail if="java_dir_empty">
+  		Neither 'java.dir' nor JAVA_HOME is set, so no compiling is possible. Please copy build.properties.sample to build.properties and edit its values.
+  	</fail>
+    <mkdir dir="build/classes"/>
+    <javac destdir="build/classes"
+           debug="${debug}"
+           deprecation="true"
+           executable="${java.dir}/bin/javac"
+           source="1.5"
+           target="1.5"
+           fork="true"
+           includeantruntime="false">
+      <compilerarg value="-Xlint"/>
+      <src>
+        <path refid="sourcepath"/>
+      </src>
+      <classpath>
+        <path refid="classpath"/>
+      </classpath>
+    </javac>
+  </target>
+  
+  <!--
+   | Packages the thumbnailer as a plugin for regain
+   +-->
+  <target name="package" depends="make">
+    <echo message="Creating AccessController.jar ..." />
+    <fileset id="classes" dir="build/classes">
+    </fileset>
+    <property name="pluginname.file" value="AccessController.jar"/>
+    
+    <jar jarfile="build/${pluginname.file}"
+         compress="false"
+         index="true">
+      <fileset refid="classes"/>
+    </jar>
+   </target>
+   
+  <!--
+   | Creates all.
+   +-->
+  <target name="all" depends="package">
+  </target>
+  
+</project>

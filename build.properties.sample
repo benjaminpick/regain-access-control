@@ -1,0 +1,11 @@
+# To use this file, rename it to "build.properties"
+
+# Should be compiled with the debug flag?
+debug=true
+
+# The location of the Java Standard Edition 6 
+#java.dir=/usr/local/lib/jdk1.6
+java.dir=C:/Programme/Java/jdk1.6.0_12
+
+# If package-plugin: where the regain installation is located
+regain-location=/path/to/regain

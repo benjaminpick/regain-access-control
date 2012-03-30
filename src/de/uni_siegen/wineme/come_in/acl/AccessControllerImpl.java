@@ -24,45 +24,23 @@ package de.uni_siegen.wineme.come_in.acl;
 import java.util.Properties;
 
 import net.sf.regain.RegainException;
-import net.sf.regain.crawler.access.CrawlerAccessController;
-import net.sf.regain.crawler.document.RawDocument;
 
-public class CrawlerAccessControllerImpl extends AccessControllerImpl implements CrawlerAccessController {
+public class AccessControllerImpl {
+	protected String defaultGroups = "";
+	protected String groupSeperator = " ";
 
-	/**
-	 * Initializes the CrawlerAccessController.
-	 * <p>
-	 * This method is called once right after the CrawlerAccessController
-	 * instance was created.
-	 * 
-	 * @param config
-	 *            The configuration.
-	 * 
-	 * @throws RegainException
-	 *             If loading the config failed.
-	 */
-	@Override
 	public void init(Properties config) throws RegainException {
-		super.init(config);
+		System.out.println("init");
+		String groupSeperatorParam = config.getProperty("groupSeperator");
+		if (groupSeperatorParam != null && groupSeperatorParam.length() > 0)
+			groupSeperator = groupSeperatorParam; 
+		
+		String defaultGroupsParam = config.getProperty("defaultGroups");
+		if (defaultGroupsParam != null)
+			defaultGroups = defaultGroupsParam + groupSeperator;
 	}
-
-	/**
-	 * Gets the names of the groups that are allowed to read the given document.
-	 * <p>
-	 * Note: The group array must not be <code>null</code> and the group names
-	 * must not contain whitespace.
-	 * 
-	 * @param document
-	 *            The document to get the groups for.
-	 * @return The groups that are allowed to read the given document.
-	 * 
-	 * @throws RegainException
-	 *             If getting the groups failed.
-	 */
-	@Override
-	public String[] getDocumentGroups(RawDocument config) throws RegainException {
-		String groups = defaultGroups; // TODO: Take Date from meta-file
-		return groupSplit(groups);
+	
+	protected String[] groupSplit(String groups) {
+		return groups.split(groupSeperator);
 	}
-
 }
