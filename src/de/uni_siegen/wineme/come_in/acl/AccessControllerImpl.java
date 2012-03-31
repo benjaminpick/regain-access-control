@@ -43,14 +43,52 @@ public class AccessControllerImpl {
 		if (groups == null || groups.length() == 0)
 			return new String[]{};
 
-		groups = groups.replaceAll(groupSeperator+"+", groupSeperator);
-		return groups.split(groupSeperator);
+		String[] arr = groups.split(groupSeperator);
+		
+		int nbNull = 0;
+		for (int i = 0; i < arr.length; i++)
+		{
+			if (arr[i].isEmpty() || arr[i].contains(" "))
+			{
+				arr[i] = null;
+				nbNull++;
+			}
+		}
+		arr = compact(arr, nbNull);
+		//debugOutputArray(arr);
+	
+		return arr;
 	}
 	
-	/*
-System.out.print(arr.length + ": [");
-for (String r : arr)
-	System.out.print(r + ",");
-System.out.println("]");
+	/**
+	 * Remove all elements with null value
+	 * @param arr
+	 * @return
 	 */
+	protected String[] compact(String[] arr, int nbNull)
+	{
+		if (nbNull == 0)
+			return arr;
+		String[] myArr = new String[arr.length - nbNull];
+		int i = 0;
+		for (String str : arr)
+		{
+			if (str != null && i < myArr.length)
+			{
+				myArr[i] = str;
+				i++;
+			}
+		}
+		return myArr;
+	}
+	
+	private void debugOutputArray(String[] arr)
+	{
+		System.out.print(arr.length + ": [");
+		for (String r : arr)
+			System.out.print(r + ",");
+		System.out.println("]");
+	}
+	
+
 }

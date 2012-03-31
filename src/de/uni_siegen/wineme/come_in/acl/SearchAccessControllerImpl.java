@@ -56,6 +56,9 @@ public class SearchAccessControllerImpl extends AccessControllerImpl implements 
 	 * <p>
 	 * Note: The group array must not be <code>null</code> and the group names
 	 * must not contain whitespace.
+     * <p>
+     * Note: For backwards compability, when this method returns null, ALL groups
+     * are allowed. Return a non-existing group to restrict access to nothing.
 	 * 
 	 * @param request
 	 *            The page request to use for identifying the user.
@@ -71,6 +74,9 @@ public class SearchAccessControllerImpl extends AccessControllerImpl implements 
 		if (groupsParam != null)
 			groups = groups + groupsParam;
 
-		return groupSplit(groups);
+		String[] groupArr = groupSplit(groups);
+		if (groupArr.length == 0 && request.getParameter("isadmin") == null)
+			groupArr = new String[] {"some-not-existing-group"};
+		return groupArr;
 	}
 }
