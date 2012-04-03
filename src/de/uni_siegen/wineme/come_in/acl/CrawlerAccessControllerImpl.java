@@ -34,6 +34,11 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 	private Database database;
 	private String relativeFilenameBase;
 
+	public CrawlerAccessControllerImpl()
+	{
+		database = new Database();
+	}
+	
 	/**
 	 * Initializes the CrawlerAccessController.
 	 * <p>

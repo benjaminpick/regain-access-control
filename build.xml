@@ -23,6 +23,9 @@
   <path id="classpath" cache="true">
     <pathelement location="build/classes"/>
   	<pathelement location="${regain-location}/build/classes"/>
+  	<fileset dir="lib">
+  	  <include name="*.jar" />
+  	</fileset>
   </path>
 
   <target name="targets">
@@ -55,16 +58,47 @@
   </target>
   
   <!--
+   | Prepares the compilation. (Extracts the libs)
+   +-->
+  <target name="prepare">
+    <echo message="Extracting the lib jars ..." />
+    <delete dir="build/included-lib-classes"/>
+    <mkdir dir="build/included-lib-classes"/>
+    <unjar dest="build/included-lib-classes">
+      <fileset dir="lib">
+        <include name="*.jar"/>
+      </fileset>
+    </unjar>
+  </target>
+  
+  <!--
+   | Prepares the compilation. (Extracts the libs)
+   | Does nothing if the libs were already extracted.
+   +-->
+  <target name="prepare-once" depends="-check-prepare, -prepare-if-needed"/>
+  <target name="-check-prepare">
+    <condition property="included-lib-classes.missing">
+      <not>
+        <available file="build/included-lib-classes" type="dir"/>
+      </not>
+    </condition>
+  </target>
+  <target name="-prepare-if-needed" if="included-lib-classes.missing">
+    <antcall target="prepare"/>
+  </target>
+
+  <!--
    | Deletes the classes directory.
    +-->
   <target name="clean">
     <delete dir="build/classes"/>
+    <delete dir="build/included-lib-classes"/>
   </target>
   
   <!--
    | Compiles the source code.
    +-->
-  <target name="make">
+  <target name="make" depends="prepare-once">
     <echo message="Making sure everything is prepared at regain ..." />
   	<ant dir="${regain-location}" useNativeBasedir="true" inheritAll="false">
   		<target name="prepare-once"/>
@@ -98,14 +132,15 @@
    +-->
   <target name="package" depends="make">
     <echo message="Creating AccessController.jar ..." />
-    <fileset id="classes" dir="build/classes">
-    </fileset>
+    <fileset id="classes" dir="build/classes" />
+    <fileset id="libs"    dir="build/included-lib-classes" />
     <property name="pluginname.file" value="AccessController.jar"/>
     
     <jar jarfile="build/${pluginname.file}"
          compress="false"
          index="true">
       <fileset refid="classes"/>
+      <fileset refid="libs"/>
     </jar>
    </target>
    
