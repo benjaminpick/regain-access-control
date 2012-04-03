@@ -23,8 +23,13 @@ package de.uni_siegen.wineme.come_in.acl;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
+
+import net.sf.regain.RegainToolkit;
 
 /**
  * Interface to database.
@@ -37,14 +42,19 @@ public class Database {
 
 	private String driverClassName = "";
 	private String connectionString = "";
+	private String tableName = "files";
+	private String columnName = "group";
+	
 	private Connection connection;
+	private PreparedStatement query;
 	
 	/**
 	 * 
 	 * @param config	Configuration from XML
 	 */
 	public void init(Properties config) {
-		driverClassName = config.getProperty("driverClassName");
+		driverClassName = config.getProperty("dbDriverClassName");
+		connectionString = config.getProperty("dbConnectionString");
 	}
 	
 	/**
@@ -59,8 +69,34 @@ public class Database {
 		connection = DriverManager.getConnection(connectionString);
 	}
 	
-	public String getGroupsForFile(String file)
+	public void disconnect() throws SQLException
 	{
-		return "";
+		try {
+			query.close();
+		} finally {
+			connection.close();
+		}
+	}
+	
+	public String getGroupsForFile(String file) throws SQLException
+	{
+		if (connection == null)
+			return "";
+		
+		if (query == null)
+		{
+			String statement = "SELECT " + columnName  + " FROM " + tableName  + " WHERE filename=?"; 
+			query = connection.prepareStatement(statement);
+			query.setMaxRows(1);
+		}
+		query.setString(1, file);
+		ResultSet results = query.executeQuery();
+		
+		if (!results.next())
+			return ""; // No database entry found!
+
+		String ret = results.getString(columnName);
+		results.close();
+		return ret;
 	}
 }

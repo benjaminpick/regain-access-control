@@ -25,12 +25,14 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import net.sf.regain.RegainException;
+import net.sf.regain.RegainToolkit;
 import net.sf.regain.crawler.access.CrawlerAccessController;
 import net.sf.regain.crawler.document.RawDocument;
 
 public class CrawlerAccessControllerImpl extends AccessControllerImpl implements CrawlerAccessController {
 
 	private Database database;
+	private String relativeFilenameBase;
 
 	/**
 	 * Initializes the CrawlerAccessController.
@@ -56,6 +58,8 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 		} catch (SQLException e) {
 			throw new RegainException("Database access failed - connectionString", e);
 		}
+		
+		relativeFilenameBase = config.getProperty("relativeFilenameBase");
 	}
 
 	/**
@@ -76,8 +80,28 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 		String groups = defaultGroups; 
 		
 		// (If the permissions change, you'll need to touch the file in order to re-index it with the correct permissions.)
-		groups = groups + database.getGroupsForFile(config.getUrl());
+		String file = config.getUrl();
+		file = getRelativeFilename(relativeFilenameBase, file);
+
+		try {
+			groups = groups + database.getGroupsForFile(file);
+		} catch (SQLException e) {
+			throw new RegainException("Could not get meta-data from database", e);
+		}
 		
 		return groupSplit(groups);
+	}
+	
+	
+	private static String getRelativeFilename(String sBase, String sTarget) {
+		if (sTarget.startsWith(sBase))
+		{
+			if (sBase.endsWith("/") || sBase.endsWith("\\") || sTarget.length() == sBase.length())
+				return sTarget.substring(sBase.length());
+			else
+				return sTarget.substring(sBase.length() + 1);
+		}
+		else
+			return sTarget; // Leave absolute
 	}
 }
