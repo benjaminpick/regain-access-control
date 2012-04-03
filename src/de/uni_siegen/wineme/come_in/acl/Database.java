@@ -39,8 +39,12 @@ public class Database {
 
 	private String driverClassName = "";
 	private String connectionString = "";
-	private String tableName = "files";
-	private String columnName = "group";
+	private String username;
+	private String password;
+
+	private String tableName = "\"files\"";
+	private String groupColumnName = "\"group\"";
+	private String filenameColumnName = "\"filename\"";
 	
 	private Connection connection;
 	private PreparedStatement query;
@@ -52,6 +56,8 @@ public class Database {
 	public void init(Properties config) {
 		driverClassName = config.getProperty("dbDriverClassName");
 		connectionString = config.getProperty("dbConnectionString");
+		username = config.getProperty("dbUsername");
+		password = config.getProperty("dbPassword");
 	}
 	
 	/**
@@ -63,7 +69,7 @@ public class Database {
 	public void connect() throws ClassNotFoundException, SQLException
 	{
 		Class.forName(driverClassName);
-		connection = DriverManager.getConnection(connectionString);
+		connection = DriverManager.getConnection(connectionString, username, password);
 	}
 	
 	public void disconnect() throws SQLException
@@ -82,7 +88,8 @@ public class Database {
 		
 		if (query == null)
 		{
-			String statement = "SELECT " + columnName  + " FROM " + tableName  + " WHERE filename=?"; 
+			String statement = "SELECT " + groupColumnName  + " FROM " + tableName  + " WHERE " + filenameColumnName + " =?";
+//System.out.println("Query: '" + statement + "'");
 			query = connection.prepareStatement(statement);
 			query.setMaxRows(1);
 		}
@@ -92,7 +99,7 @@ public class Database {
 		if (!results.next())
 			return ""; // No database entry found!
 
-		String ret = results.getString(columnName);
+		String ret = results.getString(1);
 		results.close();
 		return ret;
 	}

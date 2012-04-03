@@ -55,7 +55,7 @@ public class AccessControllerImpl {
 			}
 		}
 		arr = compact(arr, nbNull);
-		//debugOutputArray(arr);
+//debugOutputArray(arr);
 	
 		return arr;
 	}

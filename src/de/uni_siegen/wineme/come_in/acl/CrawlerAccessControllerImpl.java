@@ -87,6 +87,8 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 		// (If the permissions change, you'll need to touch the file in order to re-index it with the correct permissions.)
 		String file = config.getUrl();
 		file = getRelativeFilename(relativeFilenameBase, file);
+		file = RegainToolkit.urlDecode(file, RegainToolkit.INDEX_ENCODING);
+//System.out.println(file);
 
 		try {
 			groups = groups + database.getGroupsForFile(file);
