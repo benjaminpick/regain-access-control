@@ -21,6 +21,7 @@
 
 package de.uni_siegen.wineme.come_in.acl;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
 import net.sf.regain.RegainException;
@@ -28,6 +29,8 @@ import net.sf.regain.crawler.access.CrawlerAccessController;
 import net.sf.regain.crawler.document.RawDocument;
 
 public class CrawlerAccessControllerImpl extends AccessControllerImpl implements CrawlerAccessController {
+
+	private Database database;
 
 	/**
 	 * Initializes the CrawlerAccessController.
@@ -44,6 +47,15 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 	@Override
 	public void init(Properties config) throws RegainException {
 		super.init(config);
+		
+		database.init(config);
+		try {
+			database.connect();
+		} catch (ClassNotFoundException e) {
+			throw new RegainException("Database access failed - verify driverClassName", e);
+		} catch (SQLException e) {
+			throw new RegainException("Database access failed - connectionString", e);
+		}
 	}
 
 	/**
@@ -61,8 +73,11 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 	 */
 	@Override
 	public String[] getDocumentGroups(RawDocument config) throws RegainException {
-		String groups = defaultGroups; // TODO: Take Data from meta-file
+		String groups = defaultGroups; 
+		
+		// (If the permissions change, you'll need to touch the file in order to re-index it with the correct permissions.)
+		groups = groups + database.getGroupsForFile(config.getUrl());
+		
 		return groupSplit(groups);
 	}
-
 }
