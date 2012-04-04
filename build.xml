@@ -23,6 +23,7 @@
   <path id="classpath" cache="true">
     <pathelement location="build/classes"/>
   	<pathelement location="${regain-location}/build/classes"/>
+  	<pathelement location="${regain-location}/build/included-lib-classes/common"/>
   	<fileset dir="lib">
   	  <include name="*.jar" />
   	</fileset>

@@ -23,16 +23,21 @@ package de.uni_siegen.wineme.come_in.acl;
 
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import net.sf.regain.RegainException;
+import net.sf.regain.crawler.document.DocumentFactory;
 
 public class AccessControllerImpl {
+	protected static Logger mLog = Logger.getLogger(DocumentFactory.class);
+	
 	protected String defaultGroups = "";
 	protected String groupSeperator = " ";
 
 	public void init(Properties config) throws RegainException {
 		String groupSeperatorParam = config.getProperty("groupSeperator");
 		if (groupSeperatorParam != null && groupSeperatorParam.length() > 0)
-			groupSeperator = groupSeperatorParam; 
+			groupSeperator = groupSeperatorParam;
 		
 		String defaultGroupsParam = config.getProperty("defaultGroups");
 		if (defaultGroupsParam != null)
@@ -48,14 +53,16 @@ public class AccessControllerImpl {
 		int nbNull = 0;
 		for (int i = 0; i < arr.length; i++)
 		{
-			if (arr[i].isEmpty() || arr[i].contains(" "))
+			if (arr[i] == null || arr[i].isEmpty() || arr[i].contains(" "))
 			{
 				arr[i] = null;
 				nbNull++;
 			}
 		}
 		arr = compact(arr, nbNull);
-//debugOutputArray(arr);
+
+		if (mLog.isDebugEnabled())
+			mLog.debug("groupSplit returns: " + array2string(arr));
 	
 		return arr;
 	}
@@ -82,12 +89,14 @@ public class AccessControllerImpl {
 		return myArr;
 	}
 	
-	private void debugOutputArray(String[] arr)
+	private String array2string(String[] arr)
 	{
-		System.out.print(arr.length + ": [");
+		StringBuilder str = new StringBuilder();
+		str.append(arr.length).append(": [");
 		for (String r : arr)
-			System.out.print(r + ",");
-		System.out.println("]");
+			str.append(r).append(",");
+		str.append("]");
+		return str.toString();
 	}
 	
 

@@ -21,6 +21,8 @@
 
 package de.uni_siegen.wineme.come_in.acl;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -29,7 +31,7 @@ import net.sf.regain.RegainToolkit;
 import net.sf.regain.crawler.access.CrawlerAccessController;
 import net.sf.regain.crawler.document.RawDocument;
 
-public class CrawlerAccessControllerImpl extends AccessControllerImpl implements CrawlerAccessController {
+public class CrawlerAccessControllerImpl extends AccessControllerImpl implements CrawlerAccessController, Closeable {
 
 	private Database database;
 	private String relativeFilenameBase;
@@ -55,8 +57,8 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 	public void init(Properties config) throws RegainException {
 		super.init(config);
 		
-		database.init(config);
 		try {
+			database.init(config);
 			database.connect();
 		} catch (ClassNotFoundException e) {
 			throw new RegainException("Database access failed - verify driverClassName", e);
@@ -88,7 +90,7 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 		String file = config.getUrl();
 		file = getRelativeFilename(relativeFilenameBase, file);
 		file = RegainToolkit.urlDecode(file, RegainToolkit.INDEX_ENCODING);
-//System.out.println(file);
+		mLog.debug("Get groups for: " + file);
 
 		try {
 			groups = groups + database.getGroupsForFile(file);
@@ -110,5 +112,11 @@ public class CrawlerAccessControllerImpl extends AccessControllerImpl implements
 		}
 		else
 			return sTarget; // Leave absolute
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (database != null)
+			database.close();
 	}
 }
