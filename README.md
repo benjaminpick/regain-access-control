@@ -8,8 +8,11 @@ Install
 -------
 
 1. ant package
-2. Copy the created file build/AccessController.jar to your regain directory
-3. Modify CrawlerConfiguration.xml: Inside `<configuration>`, add:
+2. Copy the created file `build/AccessController.jar` to your regain directory (or adjust the directories below)
+  * Desktop version: The directory where `regain.jar` resides
+  * Server version: The directory of `regain-crawler.jar`, as well as `$CATALINA_HOME/conf/regain` (where `SearchConfiguration.xml` resides)
+
+3. Modify `CrawlerConfiguration.xml`: Inside `<configuration>`, add:
 
 <crawlerAccessController>
   <class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.CrawlerAccessControllerImpl</class>
