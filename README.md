@@ -14,28 +14,28 @@ Install
 
 3. Modify `CrawlerConfiguration.xml`: Inside `<configuration>`, add:
 
-<crawlerAccessController>
-  <class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.CrawlerAccessControllerImpl</class>
-  <config>
-    <param name="groupSeperator">,</param>
-    <!-- Groups that are always added -->
-    <param name="defaultGroups"> </param>
-    <!-- Should be equal to start in startlist -->
-    <param name="relativeFilenameBase">file:///path/to/dir</param>
-
-    <param name="dbConnectionString">jdbc:postgresql://localhost/database</param>    
-    <param name="dbUsername">username</param>
-    <param name="dbPassword">password</param>
-  </config>
-</crawlerAccessController>
+		<crawlerAccessController>
+		  <class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.CrawlerAccessControllerImpl</class>
+		  <config>
+		    <param name="groupSeperator">,</param>
+		    <!-- Groups that are always added -->
+		    <param name="defaultGroups"> </param>
+		    <!-- Should be equal to start in startlist -->
+		    <param name="relativeFilenameBase">file:///path/to/dir</param>
+		
+		    <param name="dbConnectionString">jdbc:postgresql://localhost/database</param>    
+		    <param name="dbUsername">username</param>
+		    <param name="dbPassword">password</param>
+		  </config>
+		</crawlerAccessController>
 
 4. Modify SearchConfiguration.xml: Inside `<defaultSettings>`, add:
 
-	<searchAccessController>
-		<class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.SearchAccessControllerImpl</class>
-    		<config>
-    			<param name="groupSeperator">,</param>
-			<param name="defaultGroups">public</param>
-		</config>
-	</searchAccessController>
+		<searchAccessController>
+			<class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.SearchAccessControllerImpl</class>
+	    		<config>
+	    			<param name="groupSeperator">,</param>
+				<param name="defaultGroups">public</param>
+			</config>
+		</searchAccessController>
 
