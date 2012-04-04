@@ -26,10 +26,9 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import net.sf.regain.RegainException;
-import net.sf.regain.crawler.document.DocumentFactory;
 
 public class AccessControllerImpl {
-	protected static Logger mLog = Logger.getLogger(DocumentFactory.class);
+	protected static Logger mLog = Logger.getLogger(AccessControllerImpl.class);
 	
 	protected String defaultGroups = "";
 	protected String groupSeperator = " ";

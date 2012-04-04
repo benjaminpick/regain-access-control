@@ -69,13 +69,17 @@ public class SearchAccessControllerImpl extends AccessControllerImpl implements 
 	 */
 	@Override
 	public String[] getUserGroups(PageRequest request) throws RegainException {
+		String paramIsAdmin = request.getParameter("isadmin");
+		if (paramIsAdmin != null)
+			return new String[] {};
+		
 		String groups = defaultGroups;
 		String groupsParam = request.getParameter("groups");
 		if (groupsParam != null)
 			groups = groups + groupsParam;
 
 		String[] groupArr = groupSplit(groups);
-		if (groupArr.length == 0 && request.getParameter("isadmin") == null)
+		if (groupArr.length == 0)
 			groupArr = new String[] {"some-not-existing-group"};
 		return groupArr;
 	}
