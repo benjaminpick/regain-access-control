@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <project name="regain-access-control" default="targets" basedir=".">
+
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="lib/ant/xmltask.jar" />
+
   <!--
    | The properties and paths
    +-->
@@ -168,7 +171,82 @@
    	  <available property="desktop-install.available" file="${desktop-install}/regain.jar" />
    	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop." />
   
+  	
+  	  <echo message="Copy plugin to ${desktop-install} ..." />
   	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${desktop-install}" />
+  	  
+  	  <echo message="Add to CrawlerConfiguration.xml..." />
+   	  <xmltask source="${desktop-install}/conf/CrawlerConfiguration.xml" dest="${desktop-install}/conf/CrawlerConfiguration.xml">
+ 		<copy path="configuration/startlist/start[1]/text()" buffer="startlist" />
+ 		<call path="configuration/crawlerAccessController/class">
+ 			<param name="class" path="text()" default="none" />
+ 			<actions>
+ 				<condition property="other-acl-present">
+ 					<not>
+ 						<equals arg1="@{class}" arg2="de.uni_siegen.wineme.come_in.acl.CrawlerAccessControllerImpl" />
+ 					</not>
+ 				</condition>
+ 				<fail if="other-acl-present" message="Could not modifiy CrawlerConfiguration.xml: A different CrawlerAccessController is already installed." />
+ 				<condition property="acl-present">
+ 					<equals arg1="@{class}" arg2="de.uni_siegen.wineme.come_in.acl.CrawlerAccessControllerImpl" />
+ 				</condition>
+ 				<!-- <echo> Found crawler plugin config: @{class}</echo> -->
+ 			</actions>
+ 		</call>
+   	  	<insert path="configuration" unless="acl-present">
+   	  	 <![CDATA[
+<crawlerAccessController>
+  <class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.CrawlerAccessControllerImpl</class>
+  <config>
+    <param name="groupSeperator">,</param>
+    <!-- Groups that are always added -->
+    <param name="defaultGroups"> </param>
+    <!-- Should be equal to start in startlist -->
+    <param name="relativeFilenameBase">file:///path/to/dir</param>
+
+    <param name="dbConnectionString">jdbc:postgresql://localhost/database</param>    
+    <param name="dbUsername">username</param>
+    <param name="dbPassword">password</param>
+  </config>
+</crawlerAccessController>  	   	  	 
+		]]>
+   	  	</insert>
+   	  	<replace unless="acl-present" path="configuration/crawlerAccessController/config/param[@name='relativeFilenameBase']/text()" withBuffer="startlist"/>
+	  </xmltask>
+	  <!-- unless acl-present -->
+	  <echo message="You'll need to adapt the database connection details in CrawlerConfiguration.xml" />
+	  
+  	  <echo message="Add to SearchConfiguration.xml..." />
+   	  <xmltask source="${desktop-install}/conf/SearchConfiguration.xml" dest="${desktop-install}/conf/SearchConfiguration.xml">
+ 		<call path="configuration/indexList/defaultSettings/searchAccessController/class">
+ 			<param name="class" path="text()" default="none" />
+ 			<actions>
+ 				<condition property="other-sacl-present">
+ 					<not>
+ 						<equals arg1="@{class}" arg2="de.uni_siegen.wineme.come_in.acl.SearchAccessControllerImpl" />
+ 					</not>
+ 				</condition>
+ 				<fail if="other-sacl-present" message="Could not modifiy SearchConfiguration.xml: A different SearchAccessController is already installed: @{class}." />
+ 				<condition property="sacl-present">
+ 					<equals arg1="@{class}" arg2="de.uni_siegen.wineme.come_in.acl.SearchAccessControllerImpl" />
+ 				</condition>
+ 				<!-- <echo> Found crawler plugin config: @{class}</echo> -->
+ 			</actions>
+ 		</call>
+   	  	<insert path="configuration/indexList/defaultSettings" unless="sacl-present">
+   	  	 <![CDATA[
+<searchAccessController>
+    <class jar="AccessController.jar">de.uni_siegen.wineme.come_in.acl.SearchAccessControllerImpl</class>
+    <config>
+        <param name="groupSeperator">,</param>
+        <param name="defaultGroups">public</param>
+    </config>
+</searchAccessController>	   	  	 
+		]]>
+   	  	</insert>
+	  </xmltask>
+	  
+	  
    </target>
    
    <target name="deploy-server"> <!-- depends="package" -->
