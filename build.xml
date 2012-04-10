@@ -28,6 +28,15 @@
   	  <include name="*.jar" />
   	</fileset>
   </path>
+  <property name="pluginname.file" value="AccessController.jar"/>
+
+  <!-- Autodetect the platform -->
+  <condition property="platform" value="linux">
+    <os family="unix"/>
+  </condition>
+  <condition property="platform" value="win">
+    <os family="windows"/>
+  </condition>
 
   <target name="targets">
 	<echo message="ant target" />
@@ -135,7 +144,6 @@
     <echo message="Creating AccessController.jar ..." />
     <fileset id="classes" dir="build/classes" />
     <fileset id="libs"    dir="build/included-lib-classes" />
-    <property name="pluginname.file" value="AccessController.jar"/>
     
     <jar jarfile="build/${pluginname.file}"
          compress="false"
@@ -151,4 +159,34 @@
   <target name="all" depends="package">
   </target>
   
+   <!-- 
+    | Install to regain desktop version 
+   -->
+   <target name="deploy-desktop"> <!-- depends="package" -->
+      <property name="desktop-install" value="${regain-location}/build/runtime/desktop/${platform}" />
+      <echo message="Installing this plugin to ${desktop-install}..." />
+   	  <available property="desktop-install.available" file="${desktop-install}/regain.jar" />
+   	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop." />
+  
+  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${desktop-install}" />
+   </target>
+   
+   <target name="deploy-server"> <!-- depends="package" -->
+      <property name="server-crawler" value="${regain-location}/build/runtime/crawler" />
+      <echo message="Installing this plugin to ${server-crawler} ..." />
+   	  <available property="crawler.available" file="${server-crawler}/regain-crawler.jar" />
+   	  <fail unless="crawler.available" message="Regain is not yet compiled. Call ant runtime-crawler." />
+  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${server-crawler}" />
+  	  
+  	  <property name="server-conf" value="${deploy-target.dir}/../conf/regain/" />
+      <echo message="Installing this plugin to ${server-conf} ..." />
+   	  <available property="server-conf.available" file="${server-conf}" />
+   	  <fail unless="server-conf.available" message="Regain is not deployed on tomcat." />
+  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${server-conf}" />
+  	  
+   </target>
+   
+   <target name="deploy" depends="deploy-server,deploy-desktop">
+   </target>
+   
 </project>

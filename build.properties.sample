@@ -9,3 +9,6 @@ java.dir=C:/Programme/Java/jdk1.6.0_12
 
 # If package-plugin: where the regain installation is located
 regain-location=/path/to/regain
+
+# The directory where the tomcat server is located
+deploy-target.dir=/path/to/apache-tomcat/webapps
