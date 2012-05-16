@@ -1,6 +1,25 @@
 <?xml version="1.0"?>
 <project name="regain-access-control" default="targets" basedir=".">
-
+<!--
+ | regain/ACL - Implement SearchAccessController/CrawlerAccessController for regain (User/Group via URL)
+ | Copyright (C) 2012 Come_IN Computerclubs (University of Siegen)
+ |
+ | This library is free software; you can redistribute it and/or
+ | modify it under the terms of the GNU Lesser General Public
+ | License as published by the Free Software Foundation; either
+ | version 2.1 of the License, or (at your option) any later version.
+ |
+ | This library is distributed in the hope that it will be useful,
+ | but WITHOUT ANY WARRANTY; without even the implied warranty of
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ | Lesser General Public License for more details.
+ |
+ | You should have received a copy of the GNU Lesser General Public
+ | License along with this library; if not, write to the Free Software
+ | Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ |
+ | Contact: Come_IN-Team <come_in-team@listserv.uni-siegen.de>
+ +-->
   <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="lib/ant/xmltask.jar" />
 
   <!--
@@ -162,21 +181,31 @@
   <target name="all" depends="package">
   </target>
   
-   <!-- 
-    | Install to regain desktop version 
+  <!--
+   | Install plugin
+   | Params:
+   ${install} - Path to install the plugin in.
    -->
-   <target name="deploy-desktop"> <!-- depends="package" -->
-      <property name="desktop-install" value="${regain-location}/build/runtime/desktop/${platform}" />
-      <echo message="Installing this plugin to ${desktop-install}..." />
-   	  <available property="desktop-install.available" file="${desktop-install}/regain.jar" />
-   	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop." />
-  
+  <target name="-install-plugin">
+      <echo message="Installing this plugin to ${install}..." />
+   	  <available property="install.available" file="${install}" />
+   	  <fail unless="install.available" message="Folder not found." />
   	
-  	  <echo message="Copy plugin to ${desktop-install} ..." />
-  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${desktop-install}" />
-  	  
-  	  <echo message="Add to CrawlerConfiguration.xml..." />
-   	  <xmltask source="${desktop-install}/conf/CrawlerConfiguration.xml" dest="${desktop-install}/conf/CrawlerConfiguration.xml">
+  	  <echo message="Copy plugin to ${install} ..." />
+  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${install}" />
+  </target>
+  
+  <!--
+   | Install plugin
+   | Params:
+   ${install-conf} - Path to install the plugin in.
+   -->
+   <target name="-install-crawler">  	  
+  	  <echo message="Add to ${install-conf}/CrawlerConfiguration.xml..." />
+   	  <available property="install.available" file="${install-conf}/CrawlerConfiguration.xml" />
+   	  <fail unless="install.available" message="CrawlerConfiguration.xml could not be found." />
+
+   	  <xmltask source="${install-conf}/CrawlerConfiguration.xml" dest="${install-conf}/CrawlerConfiguration.xml">
  		<copy path="configuration/startlist/start[1]/text()" buffer="startlist" />
  		<call path="configuration/crawlerAccessController/class">
  			<param name="class" path="text()" default="none" />
@@ -215,9 +244,13 @@
 	  </xmltask>
 	  <!-- unless acl-present -->
 	  <echo message="You'll need to adapt the database connection details in CrawlerConfiguration.xml" />
-	  
-  	  <echo message="Add to SearchConfiguration.xml..." />
-   	  <xmltask source="${desktop-install}/conf/SearchConfiguration.xml" dest="${desktop-install}/conf/SearchConfiguration.xml">
+  </target>
+  
+  <target name="-install-search">
+      <echo message="Add to ${install-conf}/SearchConfiguration.xml..." />
+   	  <available property="install.available" file="${install-conf}/SearchConfiguration.xml" />
+   	  <fail unless="install.available" message="SearchConfiguration.xml could not be found." />
+   	  <xmltask source="${install-conf}/SearchConfiguration.xml" dest="${install-conf}/SearchConfiguration.xml">
  		<call path="configuration/indexList/defaultSettings/searchAccessController/class">
  			<param name="class" path="text()" default="none" />
  			<actions>
@@ -245,23 +278,62 @@
 		]]>
    	  	</insert>
 	  </xmltask>
+  </target>
+  
+   <!-- 
+    | Install to regain desktop version 
+   -->
+   <target name="deploy-desktop"> <!-- depends="package" -->
+      <property name="desktop-install" value="${regain-location}/build/runtime/desktop/${platform}" />
+      <echo message="Installing this plugin to ${desktop-install}..." />
+   	  <available property="desktop-install.available" file="${desktop-install}/regain.jar" />
+   	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop." />
+
+   	  <available property="conf.available" file="${desktop-install}/conf/DesktopConfiguration.xml" />
+   	  <copy todir="${desktop-install}/conf" overwrite="false" granularity="5256000000">
+   	  	<fileset dir="${desktop-install}/conf/default" />   	  
+   	  </copy>
+  
+  	  <antcall target="-install-plugin">
+  	  	<param name="install" value="${desktop-install}" />
+  	  </antcall>
 	  
+	  <antcall target="-install-crawler">
+  	  	<param name="install-conf" value="${desktop-install}/conf" />
+	  </antcall>
 	  
+	  <antcall target="-install-search">
+  	  	<param name="install-conf" value="${desktop-install}/conf" />
+	  </antcall>
    </target>
    
    <target name="deploy-server"> <!-- depends="package" -->
+   
       <property name="server-crawler" value="${regain-location}/build/runtime/crawler" />
       <echo message="Installing this plugin to ${server-crawler} ..." />
    	  <available property="crawler.available" file="${server-crawler}/regain-crawler.jar" />
    	  <fail unless="crawler.available" message="Regain is not yet compiled. Call ant runtime-crawler." />
-  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${server-crawler}" />
+
+  	  <antcall target="-install-plugin">
+  	  	<param name="install" value="${server-crawler}" />
+  	  </antcall>
+  	  
+  	  <antcall target="-install-crawler">
+  	  	<param name="install-conf" value="${server-crawler}" />
+	  </antcall>
   	  
   	  <property name="server-conf" value="${deploy-target.dir}/../conf/regain/" />
       <echo message="Installing this plugin to ${server-conf} ..." />
    	  <available property="server-conf.available" file="${server-conf}" />
    	  <fail unless="server-conf.available" message="Regain is not deployed on tomcat." />
-  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${server-conf}" />
+  	  <antcall target="-install-plugin">
+  	  	<param name="install" value="${server-conf}" />
+  	  </antcall>
   	  
+  	  <antcall target="-install-search">
+  	  	<param name="install-conf" value="${server-conf}" />
+	  </antcall>
+
    </target>
    
    <target name="deploy" depends="deploy-server,deploy-desktop">

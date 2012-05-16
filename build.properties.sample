@@ -1,4 +1,4 @@
-# To use this file, rename it to "build.properties"
+# To use this file, rename it to "build.properties" and adapt paths
 
 # Should be compiled with the debug flag?
 debug=true
