@@ -98,10 +98,16 @@ public class Database implements Closeable {
 	{
 		try {
 			if (query != null)
+			{
 				query.close();
+				query = null;
+			}
 		} finally {
 			if (connection != null)
+			{
 				connection.close();
+				connection = null;
+			}
 		}
 	}
 	
