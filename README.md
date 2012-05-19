@@ -23,7 +23,7 @@ Install
 		    <!-- Should be equal to start in startlist -->
 		    <param name="relativeFilenameBase">file:///path/to/dir</param>
 		
-		    <param name="dbConnectionString">jdbc:postgresql://localhost/database</param>    
+		    <param name="dbConnectionString">jdbc:postgresql://localhost:5432/database</param>    
 		    <param name="dbUsername">username</param>
 		    <param name="dbPassword">password</param>
 		  </config>
