@@ -38,6 +38,9 @@ import org.apache.log4j.Logger;
  * 
  * Postgresql needs to be configured correctly (if not localhost):
  * @see http://jdbc.postgresql.org/documentation/80/prepare.html
+ * 
+ * For details on the connection string,
+ * @see http://jdbc.postgresql.org/documentation/80/connect.html
  */
 public class Database implements Closeable {
 
@@ -51,7 +54,7 @@ public class Database implements Closeable {
 	private String username;
 	private String password;
 
-	private String tableName = "files";
+	private String tableName = "file";
 	private String groupColumnName = "group";
 	private String filenameColumnName = "filename";
 	
