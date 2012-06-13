@@ -56,7 +56,7 @@ public class Database implements Closeable {
 
 	private String tableName = "file";
 	private String groupColumnName = "groups";
-	private String filenameColumnName = "filename";
+	private String filenameColumnName = "fs_location";
 	
 	private Connection connection;
 	private PreparedStatement query;
