@@ -51,6 +51,7 @@
   	</fileset>
   </path>
   <property name="pluginname.file" value="AccessController.jar"/>
+  <property name="crawlerpluginname.file" value="AdditionalFieldsDatabasePlugin.jar" />
 
   <!-- Autodetect the platform -->
   <condition property="platform" value="linux">
@@ -160,10 +161,10 @@
   </target>
   
   <!--
-   | Packages the thumbnailer as a plugin for regain
+   | Packages the acl as a plugin for regain
    +-->
   <target name="package" depends="make">
-    <echo message="Creating AccessController.jar ..." />
+    <echo message="Creating ${pluginname.file} ..." />
     <fileset id="classes" dir="build/classes" />
     <fileset id="libs"    dir="build/included-lib-classes" />
     
@@ -175,10 +176,29 @@
     </jar>
    </target>
    
+  <target name="package-crawlerplugin" depends="make">
+    <echo message="Creating ${crawlerpluginname.file} ..." />
+    <fileset id="classes" dir="build/classes" />
+    <fileset id="libs"    dir="build/included-lib-classes" />
+    
+    <jar jarfile="build/${crawlerpluginname.file}"
+         compress="false"
+         index="true">
+      <manifest>
+        <attribute name="Plugin-Class" value="de.uni_siegen.wineme.come_in.fetch.AdditionalFieldsDatabasePlugin"/>
+      </manifest>
+      
+      <fileset refid="classes"/>
+      <fileset refid="libs"/>
+    </jar>
+   </target>
+   
+  
+   
   <!--
    | Creates all.
    +-->
-  <target name="all" depends="package">
+  <target name="all" depends="package, package-crawlerplugin">
   </target>
   
   <!--

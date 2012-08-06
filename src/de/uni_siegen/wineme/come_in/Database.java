@@ -19,16 +19,17 @@
  * Contact: Come_IN-Team <come_in-team@listserv.uni-siegen.de>
  */
 
-package de.uni_siegen.wineme.come_in.acl;
+package de.uni_siegen.wineme.come_in;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
+
+import net.sf.regain.RegainToolkit;
 
 import org.apache.log4j.Logger;
 
@@ -44,36 +45,58 @@ import org.apache.log4j.Logger;
  */
 public class Database implements Closeable {
 
+	private static final String PARAM_DB_PASSWORD = "dbPassword";
+	private static final String PARAM_DB_USERNAME = "dbUsername";
+	private static final String PARAM_DB_CONNECTION_STRING = "dbConnectionString";
 	private static final int DATABASE_CONNECT_TIMEOUT_SEC = 5;
 	private static final int DATABASE_TIMEOUT_SEC = 2;
 
-	private static Logger mLog = Logger.getLogger(Database.class);
+	protected static Logger mLog = Logger.getLogger(Database.class);
 	
 	private String driverClassName = "org.postgresql.Driver"; // MySQL: com.mysql.jdbc.Driver
 	private String connectionString = "";
 	private String username;
 	private String password;
 
-	private String tableName = "file";
-	private String groupColumnName = "groups";
-	private String filenameColumnName = "fs_location";
+	protected String tableName = "file";
+	protected String filenameColumnName = "fs_location";
 	
-	private Connection connection;
-	private PreparedStatement query;
+	protected Connection connection;
+	protected void init() throws ClassNotFoundException
+	{
+		Class.forName(driverClassName);
+	}
 	
 	/**
-	 * Inti use.
+	 * Init use.
 	 * @param config	Configuration from XML
 	 * @throws ClassNotFoundException	The driverClassName has not be found (is the connector in classpath?)
 	 */
 	public void init(Properties config) throws ClassNotFoundException {
-		Class.forName(driverClassName);
 		
 		//driverClassName = config.getProperty("dbDriverClassName");
-		connectionString = config.getProperty("dbConnectionString");
-		username = config.getProperty("dbUsername");
-		password = config.getProperty("dbPassword");
+		connectionString = config.getProperty(PARAM_DB_CONNECTION_STRING);
+		username = config.getProperty(PARAM_DB_USERNAME);
+		password = config.getProperty(PARAM_DB_PASSWORD);
+		
+		init();
 	}
+
+	/**
+	 * Init use.
+	 * @param config	Configuration from Parameters
+	 * @throws ClassNotFoundException	The driverClassName has not be found (is the connector in classpath?)
+	 */
+	public void init(Map<String, String> config) throws ClassNotFoundException {
+		//driverClassName = config.getProperty("dbDriverClassName");
+		connectionString = config.get(PARAM_DB_CONNECTION_STRING);
+		username = config.get(PARAM_DB_USERNAME);
+		password = config.get(PARAM_DB_PASSWORD);
+		
+		init();
+	}
+	
+	
 	
 	/**
 	 * Connect to database
@@ -99,64 +122,13 @@ public class Database implements Closeable {
 	
 	public void disconnect() throws SQLException
 	{
-		try {
-			if (query != null)
-			{
-				query.close();
-				query = null;
-			}
-		} finally {
-			if (connection != null)
-			{
-				connection.close();
-				connection = null;
-			}
+		if (connection != null)
+		{
+			connection.close();
+			connection = null;
 		}
 	}
 	
-	public String getGroupsForFile(String file) throws SQLException
-	{
-		if (connection == null)
-		{
-			mLog.warn("No connection: return no groups");
-			return "";
-		}
-		
-		try {
-			return _getGroupsForFile(file);
-		} catch (SQLException e) {
-			// Re-Connect and retry
-			mLog.info("SQL Exception: " + e.getMessage() + " - Trying reconnect");
-			connect();
-			return _getGroupsForFile(file);
-		}
-	}
-
-	private String _getGroupsForFile(String file) throws SQLException {
-		if (query == null)
-		{
-			String statement = "SELECT \"" + groupColumnName  + "\" FROM \"" + tableName  + "\" WHERE \"" + filenameColumnName + "\" = ?";
-			mLog.debug("SQL Query: '" + statement + "'");
-			query = connection.prepareStatement(statement);
-			query.setMaxRows(1);
-		}
-		query.setString(1, file);
-		ResultSet results = null; 
-		try {
-			results = query.executeQuery();
-			if (!results.next())
-			{
-				mLog.warn("CrawlerAccessController says: No database entry found for file '" + file + "'");
-				return "";
-			}
-
-			return results.getString(1);
-		} finally {
-			if (results != null)
-				results.close();
-		}
-	}
-
 	@Override
 	public void close() throws IOException {
 		try {
