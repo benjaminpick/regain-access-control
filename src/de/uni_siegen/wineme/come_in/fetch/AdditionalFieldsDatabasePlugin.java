@@ -122,6 +122,14 @@ public class AdditionalFieldsDatabasePlugin extends AbstractCrawlerPlugin {
 					continue;
 			preparator.addAdditionalField(_column2field(entry.getKey()), entry.getValue());
 		}
+
+		String additional_text = values.get("additional_searchable_text");
+		if (additional_text != null)
+		{
+			String data = preparator.getCleanedMetaData();
+			data += additional_text;
+			preparator.setCleanedMetaData(data);
+		}
 	}
 	
 	private String _column2field(String key) {
