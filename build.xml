@@ -61,6 +61,13 @@
     <os family="windows"/>
   </condition>
 
+  <!-- Standard Regain paths -->
+  <property name="desktop-install" value="${regain-location}/build/runtime/desktop/${platform}" />
+  <available property="desktop-install.available" file="${desktop-install}/regain.jar" />
+  <property name="server-crawler" value="${regain-location}/build/runtime/crawler" />
+  <property name="server-conf" value="${deploy-target.dir}/../conf/regain/" />
+
+
   <target name="targets">
 	<echo message="ant target" />
 	<echo message="" />
@@ -69,7 +76,9 @@
   	<echo message="  dump-info            Dumps some information (VM-Version...)."/>
    	<echo message="  clean                Deletes the classes directory."/>
    	<echo message="  make                 Compiles the source code."/>
-   	<echo message="  package              Packages the thumbnailer lib as standalone library." />
+   	<echo message="  package              Packages the regain access controller as library." />
+   	<echo message="  deploy-desktop       Installs the regain access controller in regain Desktop." />
+   	<echo message="  deploy-server        Installs the regain access controller in regain Server." />
     <echo message="  all                  Creates all."/>
   </target>
 	
@@ -176,25 +185,6 @@
     </jar>
    </target>
    
-  <target name="package-crawlerplugin" depends="make">
-    <echo message="Creating ${crawlerpluginname.file} ..." />
-    <fileset id="classes" dir="build/classes" />
-    <fileset id="libs"    dir="build/included-lib-classes" />
-    
-    <jar jarfile="build/${crawlerpluginname.file}"
-         compress="false"
-         index="true">
-      <manifest>
-        <attribute name="Plugin-Class" value="de.uni_siegen.wineme.come_in.fetch.AdditionalFieldsDatabasePlugin"/>
-      </manifest>
-      
-      <fileset refid="classes"/>
-      <fileset refid="libs"/>
-    </jar>
-   </target>
-   
-  
-   
   <!--
    | Creates all.
    +-->
@@ -204,6 +194,7 @@
   <!--
    | Install plugin
    | Params:
+   ${file-src} - File to copy
    ${install} - Path to install the plugin in.
    -->
   <target name="-install-plugin">
@@ -212,7 +203,7 @@
    	  <fail unless="install.available" message="Folder not found." />
   	
   	  <echo message="Copy plugin to ${install} ..." />
-  	  <copy file="build/${pluginname.file}" preservelastmodified="true" todir="${install}" />
+  	  <copy file="build/${file-src}" preservelastmodified="true" todir="${install}" />
   </target>
   
   <!--
@@ -304,9 +295,7 @@
     | Install to regain desktop version 
    -->
    <target name="deploy-desktop"> <!-- depends="package" -->
-      <property name="desktop-install" value="${regain-location}/build/runtime/desktop/${platform}" />
       <echo message="Installing this plugin to ${desktop-install}..." />
-   	  <available property="desktop-install.available" file="${desktop-install}/regain.jar" />
    	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop." />
 
    	  <available property="conf.available" file="${desktop-install}/conf/DesktopConfiguration.xml" />
@@ -315,6 +304,7 @@
    	  </copy>
   
   	  <antcall target="-install-plugin">
+  	  	<param name="file-src" value="${pluginname.file}" />
   	  	<param name="install" value="${desktop-install}" />
   	  </antcall>
 	  
@@ -328,13 +318,12 @@
    </target>
    
    <target name="deploy-server"> <!-- depends="package" -->
-   
-      <property name="server-crawler" value="${regain-location}/build/runtime/crawler" />
       <echo message="Installing this plugin to ${server-crawler} ..." />
    	  <available property="crawler.available" file="${server-crawler}/regain-crawler.jar" />
    	  <fail unless="crawler.available" message="Regain is not yet compiled. Call ant runtime-crawler." />
 
   	  <antcall target="-install-plugin">
+  	  	<param name="file-src" value="${pluginname.file}" />
   	  	<param name="install" value="${server-crawler}" />
   	  </antcall>
   	  
@@ -342,7 +331,6 @@
   	  	<param name="install-conf" value="${server-crawler}" />
 	  </antcall>
   	  
-  	  <property name="server-conf" value="${deploy-target.dir}/../conf/regain/" />
       <echo message="Installing this plugin to ${server-conf} ..." />
    	  <available property="server-conf.available" file="${server-conf}" />
    	  <fail unless="server-conf.available" message="Regain is not deployed on tomcat." />
@@ -353,10 +341,111 @@
   	  <antcall target="-install-search">
   	  	<param name="install-conf" value="${server-conf}" />
 	  </antcall>
-
    </target>
    
    <target name="deploy" depends="deploy-server,deploy-desktop">
    </target>
+   
+   <!-- Inofficial Addendum: AdditionalFieldsDatabasePlugin -->
+
+  <target name="package-crawlerplugin" depends="make">
+    <echo message="Creating ${crawlerpluginname.file} ..." />
+    <fileset id="classes" dir="build/classes" />
+    <fileset id="libs"    dir="build/included-lib-classes" />
+    
+    <jar jarfile="build/${crawlerpluginname.file}"
+         compress="false"
+         index="true">
+      <manifest>
+        <attribute name="Plugin-Class" value="de.uni_siegen.wineme.come_in.fetch.AdditionalFieldsDatabasePlugin"/>
+      </manifest>
+      
+      <fileset refid="classes"/>
+      <fileset refid="libs"/>
+    </jar>
+   </target>
+
+   <target name="deploy-desktop-crawlerplugin"> <!-- depends="package" -->
+      <echo message="Installing the crawler plugin to ${desktop-install}..." />
+   	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop." />
+
+   	  <available property="conf.available" file="${desktop-install}/conf/DesktopConfiguration.xml" />
+   	  <copy todir="${desktop-install}/conf" overwrite="false" granularity="5256000000">
+   	  	<fileset dir="${desktop-install}/conf/default" />   	  
+   	  </copy>
+  
+  	  <antcall target="-install-plugin">
+  	  	<param name="file-src" value="${crawlerpluginname.file}" />
+  	  	<param name="install" value="${desktop-install}/plugins" />
+  	  </antcall>
+  	  
+  	  <antcall target="-install-crawlerplugin">
+  	  	<param name="install-conf" value="${desktop-install}/conf" />
+	  </antcall>
+  </target>
+
+   <target name="deploy-server-crawlerplugin"> <!-- depends="package" -->
+      <echo message="Installing the crawler plugin to ${server-crawler} ..." />
+   	  <available property="crawler.available" file="${server-crawler}/regain-crawler.jar" />
+   	  <fail unless="crawler.available" message="Regain is not yet compiled. Call ant runtime-crawler." />
+
+  	  <antcall target="-install-plugin">
+  	  	<param name="file-src" value="${crawlerpluginname.file}" />
+  	  	<param name="install" value="${server-crawler}/plugins" />
+  	  </antcall>
+
+  	  <antcall target="-install-crawlerplugin">
+  	  	<param name="install-conf" value="${server-crawler}" />
+	  </antcall>
+   </target>
+
+  <!--
+   | Install plugin
+   | Params:
+   ${install-conf} - Path to install the plugin in.
+   -->
+   <target name="-install-crawlerplugin">  	  
+  	  <echo message="Add to ${install-conf}/CrawlerConfiguration.xml..." />
+   	  <available property="install.available" file="${install-conf}/CrawlerConfiguration.xml" />
+   	  <fail unless="install.available" message="CrawlerConfiguration.xml could not be found." />
+
+   	  <xmltask source="${install-conf}/CrawlerConfiguration.xml" dest="${install-conf}/CrawlerConfiguration.xml">
+ 		<copy path="configuration/startlist/start[1]/text()" buffer="startlist" />
+ 		
+ 		<call path="configuration/crawlerPluginList/crawlerPlugin/class">
+ 			<param name="class" path="text()" default="none" />
+ 			<actions>
+ 				<condition property="crawlerplugin-present">
+ 					<equals arg1="@{class}" arg2="de.uni_siegen.wineme.come_in.fetch.AdditionalFieldsDatabasePlugin" />
+ 				</condition>
+ 				<!-- <echo> Found crawler plugin config: @{class}</echo> -->
+ 			</actions>
+ 		</call>
+   	  	<insert path="configuration/crawlerPluginList" unless="crawlerplugin-present">
+   	  	 <![CDATA[
+  <crawlerPlugin enabled="true">
+    <class>de.uni_siegen.wineme.come_in.fetch.AdditionalFieldsDatabasePlugin</class>
+  	  <config>
+  	    <section name="database">
+  	    	<!-- Fields, commaseperated, e.g. 'list,of,fields' -->
+			<param name="blacklistFields"></param>
+  	    	    
+		    <!-- Should be equal to start in startlist -->
+		    <param name="relativeFilenameBase">file:///path/to/dir</param>
+
+		    <param name="dbConnectionString">jdbc:postgresql://localhost/database</param>    
+		    <param name="dbUsername">username</param>
+		    <param name="dbPassword">password</param>
+  	    </section>
+  	  </config>
+  </crawlerPlugin>
+		]]>
+   	  	</insert>
+   	  	<replace unless="crawlerplugin-present" path="configuration/crawlerPluginList/crawlerPlugin/config/section[@name='database']/param[@name='relativeFilenameBase']/text()" withBuffer="startlist"/>
+	  </xmltask>
+	  <!-- unless acl-present -->
+	  <echo message="You'll need to adapt the database connection details in CrawlerConfiguration.xml" />
+  </target>
+
    
 </project>
