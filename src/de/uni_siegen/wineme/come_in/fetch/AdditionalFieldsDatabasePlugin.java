@@ -116,6 +116,9 @@ public class AdditionalFieldsDatabasePlugin extends AbstractCrawlerPlugin {
 		} catch (SQLException e) {
 			throw new RuntimeException("CrawlerPlugin could not find the additional fields in database", e);
 		} 
+		if (values == null)
+			return;
+		
 		for (Map.Entry<String, String> entry : values.entrySet())
 		{
 			if (blacklist.contains(entry.getKey()))
