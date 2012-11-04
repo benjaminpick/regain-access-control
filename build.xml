@@ -367,7 +367,7 @@
 
    <target name="deploy-desktop-crawlerplugin"> <!-- depends="package" -->
       <echo message="Installing the crawler plugin to ${desktop-install}..." />
-   	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop." />
+   	  <fail unless="desktop-install.available" message="Regain is not yet compiled. Call ant runtime-desktop at the regain install or check if the regain folder above is correct." />
 
    	  <available property="conf.available" file="${desktop-install}/conf/DesktopConfiguration.xml" />
    	  <copy todir="${desktop-install}/conf" overwrite="false" granularity="5256000000">
@@ -427,9 +427,10 @@
     <class>de.uni_siegen.wineme.come_in.fetch.AdditionalFieldsDatabasePlugin</class>
   	  <config>
   	    <section name="database">
-  	    	<!-- Fields, commaseperated, e.g. 'list,of,fields' -->
+  	    	<!-- Fields, commaseperated, e.g. 'list,of,fields' 
 			<param name="blacklistFields"></param>
-  	    	    
+  	    	-->
+    
 		    <!-- Should be equal to start in startlist -->
 		    <param name="relativeFilenameBase">file:///path/to/dir</param>
 
